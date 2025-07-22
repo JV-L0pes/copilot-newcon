@@ -258,4 +258,26 @@ class SecurityGuard {
   getAuditLog(limit = 100) {
     return this.auditLog.slice(-limit);
   }
+  /**
+   * Valida se é ambiente de desenvolvimento com dados dummy
+   * @param {Object} data - Dados a serem validados
+   * @returns {boolean} True se são dados de teste
+   */
+  isDummyData(data) {
+    const dummyIndicators = [
+      "340.215.068-96", // CPF do Ulysses para teste
+      "ulysses",
+      "teste",
+      "dummy",
+      "test",
+      "bitencourt lima",
+    ];
+
+    const dataString = JSON.stringify(data).toLowerCase();
+    return dummyIndicators.some((indicator) =>
+      dataString.includes(indicator.toLowerCase())
+    );
+  }
 }
+
+module.exports = SecurityGuard;
