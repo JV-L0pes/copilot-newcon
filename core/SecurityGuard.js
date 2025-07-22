@@ -170,4 +170,32 @@ class SecurityGuard {
 
     return parseInt(cpf[10]) === digit2;
   }
+  /**
+   * Middleware Express para autenticação
+   */
+  authMiddleware() {
+    return (req, res, next) => {
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({
+          error: "UNAUTHORIZED",
+          message: "Token de acesso obrigatório",
+        });
+      }
+
+      const token = authHeader.substring(7);
+      const decoded = this.validateToken(token);
+
+      if (!decoded) {
+        return res.status(401).json({
+          error: "INVALID_TOKEN",
+          message: "Token inválido ou expirado",
+        });
+      }
+
+      req.user = decoded;
+      next();
+    };
+  }
 }
