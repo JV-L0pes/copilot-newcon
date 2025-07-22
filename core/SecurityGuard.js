@@ -105,4 +105,34 @@ class SecurityGuard {
 
     return true;
   }
+  /**
+   * Sanitiza dados de entrada para prevenir ataques
+   * @param {Object} data - Dados a serem sanitizados
+   * @returns {Object} Dados sanitizados
+   */
+  sanitizeInput(data) {
+    if (typeof data !== "object" || data === null) {
+      return data;
+    }
+
+    const sanitized = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === "string") {
+        // Remove caracteres perigosos
+        sanitized[key] = value
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+          .replace(/javascript:/gi, "")
+          .replace(/on\w+\s*=/gi, "")
+          .trim()
+          .substring(0, 1000); // Limita tamanho
+      } else if (typeof value === "object") {
+        sanitized[key] = this.sanitizeInput(value);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+
+    return sanitized;
+  }
 }
