@@ -135,4 +135,39 @@ class SecurityGuard {
 
     return sanitized;
   }
+  /**
+   * Valida CPF (específico para dados brasileiros)
+   * @param {string} cpf - CPF a ser validado
+   * @returns {boolean} True se válido
+   */
+  validateCPF(cpf) {
+    // Remove formatação
+    cpf = cpf.replace(/[^\d]/g, "");
+
+    // Verifica se tem 11 dígitos
+    if (cpf.length !== 11) return false;
+
+    // Verifica se todos os dígitos são iguais
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+    // Calcula primeiro dígito verificador
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cpf[i]) * (10 - i);
+    }
+    let remainder = sum % 11;
+    const digit1 = remainder < 2 ? 0 : 11 - remainder;
+
+    if (parseInt(cpf[9]) !== digit1) return false;
+
+    // Calcula segundo dígito verificador
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cpf[i]) * (11 - i);
+    }
+    remainder = sum % 11;
+    const digit2 = remainder < 2 ? 0 : 11 - remainder;
+
+    return parseInt(cpf[10]) === digit2;
+  }
 }
