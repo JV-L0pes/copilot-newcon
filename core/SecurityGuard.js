@@ -198,4 +198,24 @@ class SecurityGuard {
       next();
     };
   }
+  /**
+   * Middleware Express para sanitização de dados
+   */
+  sanitizeMiddleware() {
+    return (req, res, next) => {
+      if (req.body) {
+        req.body = this.sanitizeInput(req.body);
+      }
+
+      if (req.query) {
+        req.query = this.sanitizeInput(req.query);
+      }
+
+      if (req.params) {
+        req.params = this.sanitizeInput(req.params);
+      }
+
+      next();
+    };
+  }
 }
