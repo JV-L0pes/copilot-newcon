@@ -218,4 +218,44 @@ class SecurityGuard {
       next();
     };
   }
+  /**
+   * Log de eventos de segurança
+   * @param {string} event - Tipo do evento
+   * @param {Object} details - Detalhes do evento
+   */
+  logSecurityEvent(event, details = {}) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      event,
+      details,
+      id: crypto.randomUUID(),
+    };
+
+    this.auditLog.push(logEntry);
+
+    // Mantém apenas os últimos 1000 logs em memória
+    if (this.auditLog.length > 1000) {
+      this.auditLog.shift();
+    }
+
+    // Log crítico no console para monitoramento
+    if (
+      [
+        "RATE_LIMIT_EXCEEDED",
+        "TOKEN_VALIDATION_FAILED",
+        "INVALID_CPF",
+      ].includes(event)
+    ) {
+      console.warn("🔒 SECURITY EVENT:", logEntry);
+    }
+  }
+
+  /**
+   * Retorna logs de auditoria
+   * @param {number} limit - Limite de registros
+   * @returns {Array} Logs de auditoria
+   */
+  getAuditLog(limit = 100) {
+    return this.auditLog.slice(-limit);
+  }
 }
