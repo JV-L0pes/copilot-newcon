@@ -68,4 +68,41 @@ class SecurityGuard {
       return null;
     }
   }
+  /**
+   * Rate limiting - Controla frequência de requests
+   * @param {string} identifier - IP ou userId
+   * @returns {boolean} True se permitido, false se excedeu limite
+   */
+  checkRateLimit(identifier) {
+    const now = Date.now();
+
+    if (!this.requestHistory.has(identifier)) {
+      this.requestHistory.set(identifier, []);
+    }
+
+    const userRequests = this.requestHistory.get(identifier);
+
+    // Remove requests antigos (fora da janela)
+    const validRequests = userRequests.filter(
+      (timestamp) => now - timestamp < this.rateLimitWindow
+    );
+
+    // Atualiza histórico
+    this.requestHistory.set(identifier, validRequests);
+
+    // Verifica limite
+    if (validRequests.length >= this.maxRequests) {
+      this.logSecurityEvent("RATE_LIMIT_EXCEEDED", {
+        identifier,
+        requestCount: validRequests.length,
+      });
+      return false;
+    }
+
+    // Adiciona request atual
+    validRequests.push(now);
+    this.requestHistory.set(identifier, validRequests);
+
+    return true;
+  }
 }
